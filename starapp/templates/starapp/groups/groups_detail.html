@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid">
+<div class="row"></div>
+<br/>
+<div class="row">
+ <div class="col-md-1 col-xs-1 col-sm-1">
+    </div>
+ <div class="col-md-8 col-xs-8 col-sm-8">
+  <p class="h2"> Number			    : 	{{groups.gr_num}}  </p>
+  <p class="h2"> Code		        : 	{{groups.gr_code}}  </p>
+  <p class="h2"> Name		        : 	{{groups.gr_name}}  </p>
+  <p class="h2"> Category		    :	{{groups.gr_cat}}
+  <p class="h2"> Status	            :	{{groups.gr_status}}
+  <p class="h2"> Contact Person	    :	{{groups.gr_contact}}
+  <p class="h2"> Contact phone		:	{{groups.gr_mobile}}
+  <p class="h2"> Email  	        :	{{groups.gr_email}}
+
+    </div>
+ <div class="col-md-1 col-xs-1 col-sm-1">
+  <a href="{% url 'editgroups' groups.pk %}">
+   <button type="button" class="btn btn-info">
+    <span class="glyphicon glyphicon-pencil"></span>
+   </button>
+  </a>
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1">
+  <a href="{% url 'deletegroups' groups.pk %}">
+   <button type="button" class="btn btn-danger">
+    <span class="glyphicon glyphicon-trash"></span>
+   </button>
+  </a>
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+</div>
+<div class="row">
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+ <div class="col-md-10 col-xs-10 col-sm-10">
+
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+</div>
+</div>
+{% endblock %}

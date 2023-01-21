@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+
+<body> {% block content %}
+
+<div id="container"></div>
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script>
+  Highcharts.chart('container', {
+      chart: {
+          type: 'column'
+      },
+      title: {
+          text: 'Group Flash'
+      },
+      xAxis: {
+          categories: [
+            {% for entry in dataset %}'{{ entry.mr_period }} Period'{% if not forloop.last %}, {% endif %}{% endfor %}
+          ]
+      },
+      series: [{
+          name: 'Contributions',
+          data: [
+            {% for entry in dataset %}{{ entry.sum_cont }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          ],
+          color: 'green'
+      }, {
+          name: 'Advances',
+          data: [
+            {% for entry in dataset %}{{ entry.sum_adv }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          ],
+          color: 'yellow'
+      }]
+  });
+</script>
+
+{% endblock %}
+</body>
+</html>

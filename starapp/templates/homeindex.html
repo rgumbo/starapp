@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+ <title>StarNEC Software</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<br>
+<br>
+<br>
+<div> <aside id="rightsidebar">
+    <nav id="nav">
+         <ul>
+             <li><a href="/period">Maintain periods</a></li>
+             <li><a href="/groups">Maintain groups</a></li>
+             <li><a href="/members">Maintain members</a></li>
+             <li><a href="/gencont">Generate Contributions </a></li>
+             <li><a href="/gentrans">Generate Transactions </a></li>
+             <li><a href="/contlist">Payments</a></li>
+             <li><a href="/advances">Make advances</a></li>
+             <li><a href="/advancetrans">Generate Advance Transactions</a></li>
+
+         </ul>
+     </nav>
+ </aside> </div>
+</body>
+</html>
+{% endblock %}

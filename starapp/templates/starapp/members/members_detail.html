@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load bootstrap4 %} {# import bootstrap4/bootstrap3 #}
+{% bootstrap_css %} {# Embed Bootstrap CSS #}
+{% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
+{% block extrahead %} {# Extra Resources Start #}
+{{ form.media }} {# Adds date-picker required JS and CSS #}
+{% endblock %}          {# Extra Resources End #}
+
+{% block content %}
+<div class="container-fluid">
+<div class="row"></div>
+<br/>
+<div class="row">
+
+ <div class="col-md-1 col-xs-1 col-sm-1"> </div>
+
+ <div class="col-md-8 col-xs-8 col-sm-8">
+  <p class="h2"> Number			    : 	{{member.gm_num}}  </p>
+  <p class="h2"> From Date		    : 	{{member.gm_gr_num}}  </p>
+  <p class="h2"> To Date		    : 	{{member.gm_sname}}  </p>
+  <p class="h2"> Status		        :	{{member.gm_fname}}
+  <p class="h2"> Process Status	    :	{{member.gm_date_joined}}
+  <p class="h2"> Interest Rate	    :	{{member.gm_units}}
+ </div>
+
+<div class="col-md-1 col-xs-1 col-sm-1">
+  <a href="{% url 'editmembers' member.pk %}">
+   <button type="button" class="btn btn-info">
+    <span class="glyphicon glyphicon-pencil"></span>
+   </button>
+  </a>
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1">
+  <a href="{% url 'deletemembers' member.pk %}">
+   <button type="button" class="btn btn-danger">
+    <span class="glyphicon glyphicon-trash"></span>
+   </button>
+  </a>
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+</div>
+<div class="row">
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+ <div class="col-md-10 col-xs-10 col-sm-10">
+
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+</div>
+</div>
+{% endblock %}

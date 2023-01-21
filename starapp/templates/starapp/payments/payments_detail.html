@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+<div class="row"></div>
+<br/>
+<div class="row">
+ <div class="col-md-1 col-xs-1 col-sm-1">
+    </div>
+ <div class="col-md-8 col-xs-8 col-sm-8">
+  <p class="h2"> Number			    : 	{{payments.mm_num}}  </p>
+  <p class="h2"> Number	Account		: 	{{payments.mm_account}}  </p>
+  <p class="h2"> Number	Name		: 	{{payments.mm_name}}  </p>
+  <p class="h2"> Reg. Date		    :	{{payments.mm_date_registered}}
+  <p class="h2"> Last Return Date	:	{{payments.mm_last_return_date}}
+  <p class="h2"> Last Return Period	:	{{payments.mm_last_return_period}}
+  <p class="h2"> Wage Bill		    :	{{payments.mm_gross_earnings}}
+  <p class="h2"> Account Status  	:	{{payments.mm_status}}
+
+    </div>
+ <div class="col-md-1 col-xs-1 col-sm-1">
+  <a href="{% url 'editpayments' payments.pk %}">
+   <button type="button" class="btn btn-info">
+    <span class="glyphicon glyphicon-pencil"></span>
+   </button>
+  </a>
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1">
+  <a href="{% url 'deletepayments' payments.pk %}">
+   <button type="button" class="btn btn-danger">
+    <span class="glyphicon glyphicon-trash"></span>
+   </button>
+  </a>
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+</div>
+<div class="row">
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+ <div class="col-md-10 col-xs-10 col-sm-10">
+
+ </div>
+ <div class="col-md-1 col-xs-1 col-sm-1"></div>
+</div>
+</div>
+{% endblock %}

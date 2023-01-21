@@ -1,0 +1,20 @@
+{% extends "starapp/base1.html" %}
+{% block page_content %}
+<div class="col-md-8 offset-md-2">
+    <h1>Posts</h1>
+    <hr>
+    {% for post in post_list %}
+    <h2><a href="{% url 'blog_detail' BlogPost.pk%}">{{ BlogPost.bp_heading }}</a></h2>
+    <small>
+        {{ BlogPost.ad_date_c.date }} |&nbsp;
+        Categories:&nbsp;
+        {% for category in BlogPost.bp_ct_code.all %}
+        <a href="{% url 'blog_category' PostCategory.ct_desc %}">
+            {{ PostCategory.ct_desc }}
+        </a>&nbsp;
+        {% endfor %}
+    </small>
+    <p>{{ post.bp_body | slice:":400" }}...</p>
+    {% endfor %}
+</div>
+{% endblock %}

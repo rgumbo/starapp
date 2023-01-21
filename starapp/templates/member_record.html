@@ -1,0 +1,12 @@
+{% extends "django_tables2/bootstrap4.html" %}
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Group Transactions</title>
+   </head>
+   <body>
+      # these two will render the table
+      {% load django_tables2 %}
+      {% render_table g_position_tab %}
+   </body>
+</html>

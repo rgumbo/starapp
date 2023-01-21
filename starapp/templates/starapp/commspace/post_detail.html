@@ -1,0 +1,63 @@
+
+{% extends "base1.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 card mb-4  mt-3 left  top">
+      <div class="card-body">
+        <h1>{% block title %} {{ post.bp_heading }} {% endblock title %}</h1>
+        <p class=" text-muted">{{ post.ad_user_c }} | {{ post.ad_date_c }}</p>
+        <p class="card-text ">{{ post.bp_body | safe }}</p>
+
+      </div>
+    </div>
+    {% block sidebar %} {% include 'starapp/commspace/sidebar.html' %} {% endblock sidebar %}
+
+  </div>
+</div>
+
+        <div class="col-md-8 card mb-4  mt-3 ">
+      <div class="card-body">
+        <!-- Contributions -->
+        <h2>{{ post.contributions.count }} Contributions</h2>
+
+        {% for contribution in contributions %}
+        <div class="Contributions" style="padding: 10px;">
+          <p class="font-weight-bold">
+            {{ contribution.pc_contributor }}
+            {{ contribution.pc_contributor }}
+            <span class=" text-muted font-weight-normal">
+              {{ contribution.ad_date_c }}
+                </span>
+
+            <p class="font-weight-bold">
+            <a href="{% url 'cont_approve' pk=contribution.pk %}" class="btn btn-primary">Approved &rarr;</a>
+            <a href="{% url 'cont_remove' pk=contribution.pk %}" class="btn btn-primary">Removed &rarr;</a>
+            <p class="card-text"> Comment Approved?: {{ contribution.pc_active }} </p>
+
+          </p>
+          {{ contribution.pc_contribution | linebreaks }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-8 card mb-4  mt-3 ">
+      <div class="card-body">
+        {% if new_contribution %}
+        <div class="alert alert-success" role="alert">
+          Your contribution is awaiting moderation
+        </div>
+        {% else %}
+        <h3>Leave your contribution</h3>
+        <form method="post" style="margin-top: 1.3em;">
+          {{ contribution_form | crispy  }}
+
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+{% endblock content %}

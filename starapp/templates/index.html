@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Pachena Platform</h1>
+  <p>Welcome to Pachena, your platform - a <em>Star Software</em>!</p>
+<br>
+    <li><a href="/bloghome">Notice Board</a></li>
+
+  <h2>Your Flash:</h2>
+  <ul>
+
+    <li><strong>Members:</strong> {{ num_members }}</li>
+    <li><strong>Total Contributions:</strong> {{ tot_cont.tot_cont }}</li>
+    <li><strong>Payments - Contributions:</strong> {{ cont_pay.cont_pay }}</li>
+    <li><strong>Total Advances:</strong> {{ tot_adv.tot_adv }}</li>
+    <li><strong>Payments - Advances:</strong> {{ adv_pay.adv_pay }}</li>
+    <li><strong>Total Interest:</strong> {{ tot_int.tot_int }}</li>
+    <li><strong>Payments - Interest:</strong> {{ int_pay.int_pay }}</li>
+    <li><strong>Total Penalties:</strong> {{ tot_pen.tot_pen }}</li>
+    <li><strong>Payments - Penalties:</strong> {{ pen_pay.pen_pay }}</li>
+    <br>
+    <li><strong>Total Receipts:</strong> {{ tot_rec.tot_rec }}</li>
+    <br>
+    <li><strong>Total Fund:</strong> {{ tot_fund.tot_fund }}</li>
+    <br>
+    <li><a href="/g_position_tab">Group Records</a></li>
+    <br>
+    <li><a href="/g_position">Group Position</a></li>
+
+    <li><a href="/g_fund">Fund Value</a></li>
+    <li><a href="/g_rec">Receipts</a></li>
+
+    {% if user.is_authenticated %}
+          <li>User: {{ user.get_username }}</li>
+          <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+        {% else %}
+          <li><a href="{% url 'login'%}?next={{request.path}}">Login Here ...</a></li>
+    {% endif %}
+
+  </ul>
+{% endblock %}

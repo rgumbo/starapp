@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+<!DOCTYPE html>
+<htm<!DOCTYPE html>
+<html>
+
+<body>{% block content %}
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<br>
+<br>
+<br>
+<div> <aside id="rightsidebar">
+    <nav id="nav">
+        {% for cont_list in cont_list %}
+            <a href="{% url 'payments' cont_list.mr_num %}"> Number  :  {{ cont_list.mr_num }} </a>
+            <p style="margin-left:2.5em"> Period            : {{ cont_list.mr_period }} </p>
+            <p style="margin-left:2.5em"> Name               : {{ cont_list.mr_num }} </p>
+            <p style="margin-left:2.5em"> Member             : {{ cont_list.mr_gm_num }} </p>
+            <p style="margin-left:2.5em"> Trans Date   : {{ cont_list.mr_trans_date }} </p>
+            <p style="margin-left:2.5em"> Due Date : {{ cont_list.mr_due_date }} </p>
+            <p style="margin-left:2.5em"> DR/CR       : {{ cont_list.mr_dr_cr }} </p>
+            <p style="margin-left:2.5em"> Units     : {{ cont_list.mr_units }} </p>
+            <p style="margin-left:2.5em"> Category   : {{ cont_list.mr_category }} </p>
+            <p style="margin-left:2.5em"> Projcted Amnt   : {{ cont_list.mr_pamount }} </p>
+            <p style="margin-left:2.5em"> Actual Amount   : {{ cont_list.mr_aamount }} </p>
+            <p style="margin-left:2.5em"> Status   : {{ cont_list.mr_status }} </p>
+        {% endfor %}
+
+     </nav>
+ </aside> </div>
+</body>
+{% endblock %}
+</html>

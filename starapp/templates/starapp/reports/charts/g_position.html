@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+
+<body> {% block content %}
+
+<div id="container"></div>
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script>
+  Highcharts.chart('container', {
+      chart: {
+          type: 'column'
+      },
+      title: {
+          text: 'Group Position By Month'
+      },
+      xAxis: {
+          categories: [
+            {% for entry in dataset %}'{{ entry.mr_period }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+          ]
+      },
+      series: [{
+          name: 'Fund Value',
+          data: [
+            {% for entry in dataset %}{{ entry.sum_cont }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          ],
+          color: 'purple'
+      },
+	{
+          name: 'Advances',
+          data: [
+            {% for entry in dataset %}{{ entry.sum_advances }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          ],
+          color: 'red'
+      },
+	{
+          name: 'Payments',
+          data: [
+            {% for entry in dataset %}{{ entry.sum_pymt }}{% if not forloop.last %}, {% endif %}{% endfor %}
+          ],
+          color: 'green'
+      },
+]
+  });
+</script>
+
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends "base1.html" %}
+{% block page_content %}
+<div class="col-md-8 offset-md-2">
+    <h1>{{ category | title }}</h1>
+    <hr>
+    {% for post in posts %}
+        <h2><a href="{% url 'blog_detail' post.pk%}">{{ BlogPost.bp_heading }}</a></h2>
+        <small>
+            {{ BlogPost.ad_date_c.date }} |&nbsp;
+            Categories:&nbsp;
+            {% for category in BlogPost.bp_head.all %}
+            <a href="{% url 'blog_category' PostCategory.ct_desc %}">
+                {{ PostCategory.ct_desc }}
+            </a>&nbsp;
+            {% endfor %}
+        </small>
+        <p>{{ BlogPost.bp_body | slice:":400" }}...</p>
+    {% endfor %}
+</div>
+{% endblock %}

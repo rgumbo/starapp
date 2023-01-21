@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% load humanize %}
+{% block content %}
+<br>
+<br>
+Transaction Listing...
+<br>
+<br>
+<br>
+
+
+  <form style="margin-left:2.5em" method="get">
+    {{ filter.form.as_p }}
+
+<!--  <label for="period">Transaction Listing:</label>
+  <input type="number" id="period" name="period"><br><br> -->
+
+    <button type="submit">Search</button>
+  </form>
+
+  <div class="col-md-10 col-xs-10 col-sm-10">
+  <ul>
+      <br>
+      <br>
+      {{ total }}
+      <br>
+      <br>
+
+  {% for cont in filter.qs %}
+
+       <li>  <a href={% url 'memberpay' mr_num=cont.mr_num gm_num=cont.mr_gm_num  gr_num=cont.mr_gr_num category=cont.mr_category %}>
+           {{ cont.mr_period }} {{ cont.mr_num }} {{ cont.mr_gm_num }} {{ cont.mr_gr_num }}
+           {{ cont.mr_gm_num.gm_sname }} {{ cont.mr_trans_date|date:'D-M-Y' }}
+             {{ cont.mr_due_date|date:'D-M-Y' }} {{ cont.mr_category }} {{ cont.mr_pamount|floatformat:2|intcomma }}
+             {{ cont.mr_aamount|floatformat:2|intcomma }} </a> </li>
+
+  {% endfor %}
+
+      </ul>
+
+  </div>
+
+{% endblock %}

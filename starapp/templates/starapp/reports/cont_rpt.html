@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+<htm<! DOCTYPE html>
+<html>
+
+<body>{% block content %}
+<br>
+<br>
+<br>
+
+List of Period {{ cont.mr_period }} Contributions
+
+<div> <aside id="rightsidebar">
+    <div class="col-md-10 col-xs-10 col-sm-10">
+    <nav id="nav">
+
+        {% for cont in cont_list %}
+          <li>  {{ cont.mr_period }} {{ cont.mr_num }} {{ cont.mr_gm_num }} {{ cont.mr_trans_date }} {{ cont.mr_due_date }} {{ cont.mr_category }} {{ cont.mr_pamount }} {{ cont.mr_aamount }} </li>
+
+        {% endfor %}
+
+     </nav>
+      </div>
+
+ </aside> </div>
+</body>
+{% endblock %}
+</html>

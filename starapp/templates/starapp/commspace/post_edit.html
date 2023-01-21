@@ -1,0 +1,31 @@
+{% extends "base1.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 card mb-4  mt-3 left  top">
+      <div class="card-body">
+        <h1>{% block title %} {{ post.bp_heading }} {% endblock title %}</h1>
+        <p class=" text-muted">{{ post.ad_user_c }} | {{ post.ad_date_c }}</p>
+        <p class="card-text ">{{ post.bp_body | safe }}</p>
+
+      </div>
+    </div>
+    {% block sidebar %} {% include 'starapp/commspace/sidebar.html' %} {% endblock sidebar %}
+
+  </div>
+</div>
+
+        <div class="col-md-8 card mb-4  mt-3 ">
+      <div class="card-body">
+
+        <form method="post" style="margin-top: 1.3em;">
+          {{ form | crispy  }}
+                  {% csrf_token %}
+          <button type="submit" class="btn btn-primary  btn-lg">Submit</button>
+        </form>
+
+      </div>
+    </div>
+{% endblock content %}
