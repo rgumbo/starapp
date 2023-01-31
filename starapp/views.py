@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
-from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Fund, Advance, AdvanceTrans,BlogPost\
+from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Advance, AdvanceTrans,BlogPost\
     , PostContribution,PostCategory,PostOrigin,PostContribution
-from .forms import PeriodForm, GroupTabForm, GroupMemberForm, MemberRecordForm, ReceiptForm, FundForm, \
+from .forms import PeriodForm, GroupTabForm, GroupMemberForm, MemberRecordForm, ReceiptForm, \
     AdvanceForm, PayListForm,GenContForm,GenTransForm,ContributionForm, BlogForm
 from .filters import MembContFilter, TransFilter
 from django.http import HttpResponse
@@ -12,8 +12,9 @@ import plotly.express  as px
 #Imports for table
 from django_tables2 import SingleTableMixin
 from django_filters.views import FilterView
-from starapp.tables import TransHTMxTable
+from .tables import TransHTMxTable
 import django_tables2 as tables
+
 
 #End imports for table
 
@@ -37,6 +38,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404
+from django.db.models.functions import Round
+
 #from django.http import HttpResponse
 import getpass
 from os import environ, getcwd
@@ -248,7 +251,6 @@ def EditGroupMember(request,pk, template_name='starapp/members/edit.html'):
         form.save()
         return redirect('members')
     return render(request, template_name, {'form': form})
-
 def memb_new(request):
     if request.method == "POST":
         form = GroupMemberForm(request.POST)
@@ -286,39 +288,39 @@ def DeleteMember(request, pk, template_name='starapp/members/confirm_delete.html
 # Group member payment
 
 def MembPayList(request):
-	#payment_list = Receipt.objects.values('py_date','py_reference','py_mm_num__mm_name','py_ed_num','py_num','py_amount') #.filter(py_status='O')
-	payment_list = MemberPayment1.objects.all()
-	context = {'payment_list' : payment_list}
+    #payment_list = Receipt.objects.values('py_date','py_reference','py_mm_num__mm_name','py_ed_num','py_num','py_amount') #.filter(py_status='O')
+    payment_list = MemberPayment1.objects.all()
+    context = {'payment_list' : payment_list}
 
-	return render(request, 'starapp/payments/paylist.html', context)
+    return render(request, 'starapp/payments/paylist.html', context)
 
 def SubmitPayView(request, pk, gm_num,gr_num):
 
-	member = GroupMember.objects.get(gm_num = gm_num)
-	memberdue = MemberRecord.objects.get(mr_num = pk)
+    member = GroupMember.objects.get(gm_num = gm_num)
+    memberdue = MemberRecord.objects.get(mr_num = pk)
 
-	new_payment = None
-	if request.method == 'POST':
+    new_payment = None
+    if request.method == 'POST':
 
-		form = ReceiptForm(data=request.POST or None)
+        form = ReceiptForm(data=request.POST or None)
 
-		if form.is_valid():
+        if form.is_valid():
 
-			# Create Receipt object but don't save to database yet
-			new_payment = form.save(commit=False)
-			new_payment.rc_mr_num = pk
-			new_payment.rc_gm_num = gm_num
-			new_payment.rc_gr_num = gr_num
-			new_payment.rc_status = 'O'
+            # Create Receipt object but don't save to database yet
+            new_payment = form.save(commit=False)
+            new_payment.rc_mr_num = pk
+            new_payment.rc_gm_num = gm_num
+            new_payment.rc_gr_num = gr_num
+            new_payment.rc_status = 'O'
 
-			new_payment.py_user = request.user
+            new_payment.py_user = request.user
 
-			new_payment.save()
-			messages.success(request,"Payment submitted successfully")
-		return redirect('payment')
-	else:
-		form = PaymentForm()
-	return render(request, 'starapp/payments/submitpay.html', {'form': form,'new_payment': new_payment})
+            new_payment.save()
+            messages.success(request,"Payment submitted successfully")
+        return redirect('payment')
+    else:
+        form = ReceiptForm()
+    return render(request, 'starapp/payments/submitpay.html', {'form': form,'new_payment': new_payment})
 # Borrower payment
 
 def MembReturnsSearch(request):
@@ -330,8 +332,9 @@ def MembReturnsSearch(request):
 def ContListView(request):
 
         total = 0
-        cont_list = MemberRecord.objects.values('mr_num', 'mr_gr_num','mr_gm_num', 'mr_gm_num__gm_sname', 'mr_period', 'mr_trans_date',
-            'mr_value_date', 'mr_due_date','mr_pamount', 'mr_aamount', 'mr_units', 'mr_pay_ref', 'mr_dr_cr',
+        cont_list = MemberRecord.objects.values('mr_num', 'mr_gr_num','mr_gm_num', 'mr_gm_num__gm_sname',
+            'mr_gm_num__gm_fname','mr_period', 'mr_trans_date', 'mr_value_date', 'mr_due_date',
+            'mr_pamount', 'mr_aamount', 'mr_units', 'mr_pay_ref', 'mr_dr_cr',
              'mr_paid', 'mr_status', 'mr_processed','mr_pay_type', 'mr_category').order_by('mr_period', 'mr_gm_num')
             #.filter(mr_period=pr_period, mr_category=trans_cat).order_by(
             #'mr_period', 'mr_gm_num')
@@ -351,73 +354,62 @@ class ContListView1(ListView):
             'mr_value_date', 'mr_due_date','mr_pamount', 'mr_aamount', 'mr_units', 'mr_pay_ref', 'mr_dr_cr',
              'mr_paid', 'mr_status', 'mr_processed','mr_pay_type', 'mr_category').order_by('mr_period', 'mr_gm_num')
 
-def MemberPayView(request, mr_num, gm_num,gr_num,category):
-    #form_class = ReceiptForm
-    form = ReceiptForm(initial={'rc_mr_num': mr_num, 'rc_gm_num': gm_num, 'rc_gr_num': gr_num, 'rc_period': 1})
+def MemberPayView(request, mr_num, mr_period, gm_num, gr_num, amount):
+    context = {}
+    # dictionary for initial data with field names as keys
+    initial_dict = {"rc_mr_num1": mr_num,"rc_period": mr_period, "rc_gm_num":  gm_num, "rc_gr_num":gr_num,
+                    "rc_pamount": amount,"rc_dr_cr": 'C'}
+
+    # add the dictionary during initialization
+    form = ReceiptForm(request.POST or None, initial = initial_dict)
+
+    context['form'] = form
     template_name = 'starapp/payments/submitpay.html'
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class()
-        #form = self.form_class(initial={'rc_mr_num': mr_num, 'rc_gm_num': gm_num, 'rc_gr_num': gr_num, 'rc_period': 1})
-
-        return render(request, self.template_name, {'ReceiptForm': form})
-
-    member = GroupMember.objects.get(gm_num = gm_num)
-        #member = GroupMember.objects.get(pk=gm_num)
-    memberdue = MemberRecord.objects.get(mr_num = mr_num)
-    mgroup = GroupTab.objects.get(gr_num = gr_num)
-
-    new_payment = None
     if request.method == 'POST':
-
-        form = ReceiptForm(data=request.POST or None)
-
+        #form = form(request.POST or None)
         if form.is_valid():
+            f_gr_num = form.cleaned_data['rc_gr_num']
+            f_gm_num = form.cleaned_data['rc_gm_num']
+            f_period = form.cleaned_data['rc_period']
+            f_trans_date = form.cleaned_data['rc_trans_date']
+            f_pamount = form.cleaned_data['rc_pamount']
+            f_aamount = form.cleaned_data['rc_aamount']
+            f_mr_num1 = form.cleaned_data['rc_mr_num1']
+            f_status = form.cleaned_data['rc_status']
+            f_processed = form.cleaned_data['rc_processed']
+            f_pay_type = form.cleaned_data['rc_pay_type']
 
-            # Create Receipt object but don't save to database yet
-            new_payment = form.save(commit=False)
+            f_pamount = (f_pamount* -1)
+            f_aamount = (f_aamount* -1)
 
-            rc_amnt 	= form.cleaned_data['rc_aamount']
-            l_pr_num = form.cleaned_data['rc_period']
-            l_pr_from_date = form.cleaned_data['rc_trans_date']
-            l_pr_from_date = form.cleaned_data['rc_trans_date']
-            l_pr_due_date = form.cleaned_data['rc_trans_date']
-
-            new_payment.rc_mr_num = memberdue
-            new_payment.rc_gm_num = member
-            new_payment.rc_pamount = rc_amnt
-            new_payment.rc_status = '1'
-
-            new_payment.ad_user_c = request.user
-
-            new_payment.save()
-
-        # Create Ledger Card Entry
-            #ledger_card = NecLedgerCard()
+            form.save()
 
             membdue = MemberRecord()
-
-            membdue.mr_gr_num = mgroup
-            membdue.mr_gm_num = member #m_list.gm_num
-            membdue.mr_period = l_pr_num
-            membdue.mr_trans_date = l_pr_from_date
-            membdue.mr_value_date = l_pr_from_date
-            membdue.mr_due_date = l_pr_due_date
-            membdue.mr_aamount = rc_amnt
+            membdue.mr_gr_num = f_gr_num
+            membdue.mr_gm_num = f_gm_num
+            membdue.mr_period = f_period
+            membdue.mr_trans_date = f_trans_date
+            membdue.mr_value_date = f_trans_date
+            membdue.mr_due_date = f_trans_date
+            membdue.mr_pamount = f_pamount
+            membdue.mr_aamount = f_aamount
             membdue.mr_units = 0
-            membdue.mr_pay_ref = memberdue
+            membdue.mr_pay_ref = f_mr_num1
+            membdue.mr_category = 'G'
             membdue.mr_dr_cr = 'C'
             membdue.mr_paid = 'N'
-            membdue.mr_status = '1'
-            membdue.mr_processed = 'N'
-            membdue.mr_pay_type = 'P'
-            membdue.mr_category = category
+            membdue.mr_status = f_status
+            membdue.mr_processed = f_processed
+            membdue.mr_pay_type = f_pay_type
 
-            messages.success(request,"Payment submitted successfully")
-        return redirect('contlist')
-    else:
-        form = ReceiptForm()
-        return render(request, 'starapp/payments/submitpay.html', {'form': form,'new_payment': new_payment})
+            membdue.save()
+
+            messages.success(request, "Payment submitted successfully")
+            return redirect('contlist')
+        else:
+             form = ReceiptForm()
+    return render(request, template_name, context)
 
 # home view for Advance. Advance are displayed in a list
 class AdvanceIndexView(ListView):
@@ -434,12 +426,47 @@ class AdvanceDetailView(DetailView):
 
 # NewAdvance view (Create new Fund)
 def AdvanceView(request):
+    form = AdvanceForm(request.POST)
     if request.method == 'POST':
-        form = AdvanceForm(request.POST)
+        #form = AdvanceForm(request.POST)
         if form.is_valid():
+            f_gr_num = form.cleaned_data['av_gr_num']
+            f_gm_num = form.cleaned_data['av_gm_num']
+            f_period = form.cleaned_data['av_period']
+            f_trans_date = form.cleaned_data['av_trans_date']
+            f_value_date = form.cleaned_data['av_value_date']
+            f_due_date = form.cleaned_data['av_due_date']
+            f_ramount = form.cleaned_data['av_ramount']
+            f_aamount = form.cleaned_data['av_aamount']
+            f_pay_ref = form.cleaned_data['av_pay_ref']
+            f_status = form.cleaned_data['av_status']
+            f_processed = form.cleaned_data['av_processed']
+            f_pay_type = form.cleaned_data['av_pay_type']
+
             form.save()
-        return redirect('advances')
-    form = AdvanceForm()
+
+            membdue = MemberRecord()
+            membdue.mr_gr_num = f_gr_num
+            membdue.mr_gm_num = f_gm_num
+            membdue.mr_period = f_period
+            membdue.mr_trans_date = f_trans_date
+            membdue.mr_value_date = f_value_date
+            membdue.mr_due_date = f_due_date
+            membdue.mr_pamount = f_ramount
+            membdue.mr_aamount = f_aamount
+            membdue.mr_pay_ref = f_pay_ref
+            membdue.mr_dr_cr = 'D'
+            membdue.mr_paid = 'N'
+            membdue.mr_status = f_status
+            membdue.mr_category = '2'
+            membdue.mr_processed = f_processed
+            membdue.mr_pay_type = f_pay_type
+
+            membdue.save()
+
+            return redirect('advances')
+        else:
+            form = ReceiptForm()
     return render(request, 'starapp/advances/advance.html', {'form': form})
 
 # Edit a Advance
@@ -462,27 +489,27 @@ def DeleteAdvance(request, pk, template_name='starapp/advances/confirm_delete.ht
 # Views for Payment process
 
 class LedgerListView(View):
-		form_class = PayListForm
-		template_name = 'starapp/payments/mainaccessl.html'
+        form_class = PayListForm
+        template_name = 'starapp/payments/mainaccessl.html'
 
-		def get(self, request, *args, **kwargs):
-			form = self.form_class()
-			return render(request, self.template_name, {'PayListForm': form})
+        def get(self, request, *args, **kwargs):
+            form = self.form_class()
+            return render(request, self.template_name, {'PayListForm': form})
 
-		def post(self, request, *args, **kwargs):
-			form_class = PayListForm
-			form = self.form_class(request.POST)
-			context = {'form': form}
-			if form.is_valid():
+        def post(self, request, *args, **kwargs):
+            form_class = PayListForm
+            form = self.form_class(request.POST)
+            context = {'form': form}
+            if form.is_valid():
 
-			    trans_cat = form.cleaned_data['trans_cat']
-			    pr_period = form.cleaned_data['trans_cat']
+                trans_cat = form.cleaned_data['trans_cat']
+                pr_period = form.cleaned_data['trans_cat']
 
-			    cont_list = MemberRecord.objects.values('mr_num','mr_gr_num','mr_gm_num','mr_period','mr_trans_date','mr_value_date','mr_due_date',
-				'mr_pamount','mr_aamount','mr_units','mr_pay_ref','mr_dr_cr','mr_paid','mr_status','mr_processed',
-				'mr_pay_type','mr_category').filter(mr_period=pr_period, mr_category=trans_cat).order_by('mr_period','mr_gm_num')
+                cont_list = MemberRecord.objects.values('mr_num','mr_gr_num','mr_gm_num','mr_period','mr_trans_date','mr_value_date','mr_due_date',
+                'mr_pamount','mr_aamount','mr_units','mr_pay_ref','mr_dr_cr','mr_paid','mr_status','mr_processed',
+                'mr_pay_type','mr_category').filter(mr_period=pr_period, mr_category=trans_cat).order_by('mr_period','mr_gm_num')
 
-			return render(request, 'starapp/payments/cont_rpt.html', {'cont_list' : cont_list})
+            return render(request, 'starapp/payments/cont_rpt.html', {'cont_list' : cont_list})
 
 class GenContView(View):
     form_class = GenContForm
@@ -504,45 +531,47 @@ class GenContView(View):
             period_rec = Period.objects.filter(pr_status='1').order_by('pr_num')[:1]
             memb_list   =   GroupMember.objects.all()
 
-            for pr in period_rec:
+            if period_rec :
 
-                l_pr_num = pr.pr_num
-                l_pr_from_date = pr.pr_from_date
-                l_pr_to_date = pr.pr_to_date
-                l_pr_due_date = pr.pr_due_date
-                l_pr_status = pr.pr_status
-                l_pr_proc_status = pr.pr_proc_status
-                l_pr_int_rate = pr.pr_int_rate
-                l_pr_amount = pr.pr_amount
+                for pr in period_rec:
 
-            for m_list in memb_list:
-                l_gm_num = m_list.gm_num
-                l_gm_gr_num = m_list.gm_gr_num
-                l_gm_units = m_list.gm_units
-                member = GroupMember.objects.get(pk=l_gm_num)
-                #m_group = GroupTab.objects.get(pk=l_gm_gr_num)
+                    l_pr_num = pr.pr_num
+                    l_pr_from_date = pr.pr_from_date
+                    l_pr_to_date = pr.pr_to_date
+                    l_pr_due_date = pr.pr_due_date
+                    l_pr_status = pr.pr_status
+                    l_pr_proc_status = pr.pr_proc_status
+                    l_pr_int_rate = pr.pr_int_rate
+                    l_pr_amount = pr.pr_amount
 
-                membdue = MemberRecord()
-                membdue.mr_gr_num = m_list.gm_gr_num
-                membdue.mr_gm_num = member #m_list.gm_num
-                membdue.mr_period = l_pr_num
-                membdue.mr_trans_date = l_pr_from_date
-                membdue.mr_value_date = l_pr_from_date
-                membdue.mr_due_date = l_pr_due_date
-                membdue.mr_pamount = (l_gm_units * l_pr_amount)
-                membdue.mr_aamount = 0
-                membdue.mr_units = l_gm_units
-                membdue.mr_pay_ref = 'P'
-                membdue.mr_dr_cr = 'D'
-                membdue.mr_paid = 'N'
-                membdue.mr_status = '1'
-                membdue.mr_processed = 'N'
-                membdue.mr_pay_type = 'P'
+                for m_list in memb_list:
+                    l_gm_num = m_list.gm_num
+                    l_gm_gr_num = m_list.gm_gr_num
+                    l_gm_units = m_list.gm_units
+                    member = GroupMember.objects.get(pk=l_gm_num)
+                    #m_group = GroupTab.objects.get(pk=l_gm_gr_num)
 
-                membdue.save()
+                    membdue = MemberRecord()
+                    membdue.mr_gr_num = m_list.gm_gr_num
+                    membdue.mr_gm_num = member #m_list.gm_num
+                    membdue.mr_period = l_pr_num
+                    membdue.mr_trans_date = l_pr_from_date
+                    membdue.mr_value_date = l_pr_from_date
+                    membdue.mr_due_date = l_pr_due_date
+                    membdue.mr_pamount = (l_gm_units * l_pr_amount)
+                    membdue.mr_aamount = 0
+                    membdue.mr_units = l_gm_units
+                    membdue.mr_pay_ref = 'P'
+                    membdue.mr_dr_cr = 'D'
+                    membdue.mr_paid = 'N'
+                    membdue.mr_status = '1'
+                    membdue.mr_processed = 'N'
+                    membdue.mr_pay_type = 'P'
+
+                    membdue.save()
+                return redirect('contlist')
 
         return render(request, self.template_name, {'GenContForm': form})
-
 class GenTransView(View):
     global l_pr_num
     global l_pr_from_date
@@ -584,7 +613,7 @@ class GenTransView(View):
                 l_pr_int_rate = pr.pr_int_rate
                 l_pr_amount = pr.pr_amount
 
-	# Generating payments
+    # Generating payments
 
             for r_list in rec_list:
                 l_gm_num = r_list.rc_gm_num
@@ -616,7 +645,7 @@ class GenTransView(View):
                 membdue.mr_pamount = l_amount
                 membdue.mr_aamount = l_amount
                 membdue.mr_pay_ref = 'P'
-                membdue.mr_category = '1'
+                membdue.mr_category = 'G'
                 membdue.mr_dr_cr = 'C'
                 membdue.mr_paid = 'N'
                 membdue.mr_status = '1'
@@ -664,83 +693,69 @@ class GenTransView(View):
 
                     membdue.save()
                     Advance.objects.filter(av_num=l_av_num).update(av_processed='2')
+            return redirect('contlist')
 
         return render(request, self.template_name, {'GenTransForm': form})
-
 def g_position(request):
 
-	#dataset = MemberRecord.objects.values('mr_period').annotate(sum_cont=Sum('mr_pamount',filter=Q(mr_dr_cr='D',mr_category ='1')),
-	#			sum_pymt=Sum('mr_aamount',filter=Q(mr_dr_cr='C')),
-	#			  sum_advances=Sum('mr_aamount',filter=Q(mr_category='2',mr_dr_cr = 'D'))) \
-		#.order_by('py_date__month')
-	dataset = MemberRecord.objects.values('mr_period').annotate(sum_cont=Sum('mr_pamount',filter=Q(mr_category ='1')),
-				sum_pymt=Sum('mr_aamount',filter=Q(mr_dr_cr='C')),
-				  sum_advances=Sum('mr_aamount',filter=Q(mr_category='2'))) \
-		#.order_by('py_date__month')
+        dataset = MemberRecord.objects.values('mr_period').annotate(
+            cont_sum=Sum('mr_pamount', filter=Q(mr_category='1')),
+            rec_sum=Sum('mr_pamount', filter=Q(mr_dr_cr ='C')),
+            adv_sum=Sum('mr_aamount', filter=Q(mr_category='2'))) \
+            .order_by('mr_period')
 
-	return render(request, 'starapp/reports/charts/g_position.html', {'dataset': dataset})
+        periods = list()
+        con_series_data = list()
+        adv_series_data = list()
+        rec_series_data = list()
 
-def g_position1(request):
+        for entry in dataset:
+            periods.append('%s Period' % entry['mr_period'])
+            con = entry['cont_sum']
+            if con is None:
+                con = 0
+            con = float(con)
+            adv = entry['adv_sum']
+            if adv is None:
+                adv = 0
+            adv = float(adv)
+            rec = entry['rec_sum']
+            if rec is None:
+                rec = 0
+            rec = float(rec)
 
-    dataset = MemberRecord.objects.values('mr_period').annotate(sum_cont=Count('mr_pamount',filter=Q(mr_category='1')),
-                  sum_adv=Count('mr_aamount',filter=Q(mr_category='2'))).order_by('mr_period')
+            con_series_data.append(con)
+            adv_series_data.append(adv)
+            rec_series_data.append(rec)
 
-    return render(request, 'starapp/reports/charts/g_position1.html', {'dataset': dataset})
+        con_series = {
+            'name': 'Contributions',
+            'data': con_series_data,
+            'color': 'purple'
+        }
 
-def g_position2(request):
-    dataset = MemberRecord.objects \
-        .values('mr_period') \
-        .annotate(sum_cont=Sum('mr_pamount', filter=Q(mr_category ='1',mr_dr_cr = 'D')),
-                  sum_adv=Sum('mr_aamount', filter=Q(mr_category ='2',mr_dr_cr = 'D')),
-                  sum_rec=Sum('mr_aamount', filter=Q(mr_dr_cr = 'C'))) \
-        .order_by('mr_period')
+        adv_series = {
+            'name': 'Advances',
+            'data': adv_series_data,
+            'color': 'red'
+        }
 
-    categories = list()
-    sum_cont_series_data = list()
-    sum_adv_series_data = list()
-    sum_rec_series_data = list()
+        rec_series = {
+            'name': 'Receipts',
+            'data': rec_series_data,
+            'color': 'green'
+        }
 
-    for entry in dataset:
-        categories.append('%s Period' % entry['mr_period'])
+        chart = {
+            'chart': {'type': 'column'},
+            'title': {'text': 'Group Financial Dashboard'},
+            'xAxis': {'periods': periods},
+            'series': [con_series, adv_series,rec_series]
+        }
 
-        sum_cont = dataset.values_list('sum_cont', flat=True)
-        sum_cont_series_data.append(entry['sum_cont'])
+        dump = json.dumps(chart, cls=DecimalEncoder)
 
-        sum_adv = dataset.values_list('sum_adv', flat=True)
-        sum_adv_series_data.append(entry['sum_adv'])
-
-        sum_rec = dataset.values_list('sum_rec', flat=True)
-        sum_rec_series_data.append(entry['sum_rec'])
-
-    contributions_series = {
-        'name': 'Contributions',
-        'data': sum_cont_series_data,
-        'color': 'green'
-    }
-
-    advances_series = {
-        'name': 'Advances',
-        'data': sum_adv_series_data,
-        'color': 'red'
-    }
-
-    receipts_series = {
-        'name': 'Receipts',
-        'data': sum_rec_series_data,
-        'color': 'orange'
-    }
-
-    chart = {
-        'chart': {'type': 'column'},
-        'title': {'text': 'Group Flash'},
-        'xAxis': {'categories': categories},
-        'series': [contributions_series, advances_series,receipts_series]
-    }
-
-    dump = json.dumps(chart, cls = DecimalEncoder)
-
-    return render(request, 'starapp/reports/charts/g_position2.html', {'chart': dump})
-
+        return render(request, 'starapp/reports/charts/g_position.html', {'chart': dump})
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         #  if passed in object is instance of Decimal
@@ -749,73 +764,6 @@ class DecimalEncoder(json.JSONEncoder):
             return str(obj)
         # otherwise use the default behavior
         return json.JSONEncoder.default(self, obj)
-
-
-def g_position3(request):
-    p_cont = MemberRecord.objects.filter(mr_category='1').values('mr_period').annotate(sum_cont=Sum('mr_pamount'))
-    #x = p_cont.values_list('mr_period', flat=True)
-    #y = p_cont.values_list('sum_cont', flat=True)
-    y = p_cont.values_list('mr_period', flat=True)
-    x = p_cont.values_list('sum_cont', flat=True)
-
-    text = [f'{sum_cont:.0f}' for sum_cont in x]
-
-    #fig = px.bar(x=x, y=y, text=text)
-    fig = px.bar( x=x, y=y, text=text)
-    fig.update_layout(
-        title_text='Group Contributions Flash',
-        #yaxis_range=[0, 500]
-    )
-
-    fig.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
-
-    chart = fig.to_html()
-    context = {'chart': chart}
-    return render(request, 'starapp/reports/charts/g_position3.html', context)
-
-def g_fund(request):
-    p_fund = MemberRecord.objects.filter(~Q(mr_category='2')).values('mr_period').annotate(sum_cont=Sum('mr_pamount'))
-    #x = p_fund.values_list('mr_period', flat=True)
-    #y = p_fund.values_list('sum_cont', flat=True)
-    y = p_fund.values_list('mr_period', flat=True)
-    x = p_fund.values_list('sum_cont', flat=True)
-
-    text = [f'{sum_cont:.0f}' for sum_cont in x]
-
-    #fig = px.bar(x=x, y=y, text=text)
-    fig = px.bar( x=x, y=y, text=text)
-    fig.update_layout(
-        title_text='Group Fund Value Flash',
-        #yaxis_range=[0, 500]
-    )
-
-    fig.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
-
-    chart = fig.to_html()
-    context = {'chart': chart}
-    return render(request, 'starapp/reports/charts/g_position3.html', context)
-
-def g_receipts(request):
-    p_fund = MemberRecord.objects.filter(mr_dr_cr='C').values('mr_period').annotate(sum_cont=Sum('mr_aamount'))
-    #x = p_fund.values_list('mr_period', flat=True)
-    #y = p_fund.values_list('sum_cont', flat=True)
-    y = p_fund.values_list('mr_period', flat=True)
-    x = p_fund.values_list('sum_cont', flat=True)
-
-    text = [f'{sum_cont:.0f}' for sum_cont in x]
-
-    #fig = px.bar(x=x, y=y, text=text)
-    fig = px.bar( x=x, y=y, text=text)
-    fig.update_layout(
-        title_text='Group Receipts Flash',
-        #yaxis_range=[0, 500]
-    )
-
-    fig.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
-
-    chart = fig.to_html()
-    context = {'chart': chart}
-    return render(request, 'starapp/reports/charts/g_position3.html', context)
 
 #Start Blog Views
 

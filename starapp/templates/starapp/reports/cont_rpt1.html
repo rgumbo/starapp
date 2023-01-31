@@ -21,23 +21,25 @@ Transaction Listing...
 
   <div class="col-md-10 col-xs-10 col-sm-10">
   <ul>
+       <br>
+      Total    :  {{ total.Total|floatformat:2|intcomma }}
       <br>
       <br>
-      {{ total }}
+      Period   Trans.Num  Group Num Member Name   Trans. Date   Due Date     Category  Amount
       <br>
       <br>
 
   {% for cont in filter.qs %}
 
-       <li>  <a href={% url 'memberpay' mr_num=cont.mr_num gm_num=cont.mr_gm_num  gr_num=cont.mr_gr_num category=cont.mr_category %}>
-           {{ cont.mr_period }} {{ cont.mr_num }} {{ cont.mr_gm_num }} {{ cont.mr_gr_num }}
-           {{ cont.mr_gm_num.gm_sname }} {{ cont.mr_trans_date|date:'D-M-Y' }}
-             {{ cont.mr_due_date|date:'D-M-Y' }} {{ cont.mr_category }} {{ cont.mr_pamount|floatformat:2|intcomma }}
-             {{ cont.mr_aamount|floatformat:2|intcomma }} </a> </li>
+       <li> <a href="{% url 'memberpay' cont.mr_num cont.mr_period cont.mr_gm_num cont.mr_gr_num cont.mr_pamount%}">
+           {{ cont.mr_period|stringformat:"04d" }} {{ cont.mr_num|stringformat:"010d" }} {{ cont.mr_gr_num|stringformat:"04d" }}
+           {{ cont.mr_gm_num|stringformat:"04d" }} {{ cont.mr_gm_num__gm_fname }} {{ cont.mr_gm_num__gm_sname }} {{ cont.mr_trans_date|date:'D-M-Y' }}
+           {{ cont.mr_due_date|date:'D-M-Y' }} {{ cont.mr_category }} {{ cont.mr_pamount|floatformat:2|intcomma }}
+           {{ cont.mr_aamount|floatformat:2|intcomma }}</a> </li>
 
   {% endfor %}
 
-      </ul>
+  </ul>
 
   </div>
 

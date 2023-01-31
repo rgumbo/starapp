@@ -131,7 +131,7 @@ class GroupMember(models.Model):
 
 class MemberRecord(models.Model):
 		mr_status_choices = (('1', 'Live'), ('2', 'Reversed'), ('3', 'Cancelled'))
-		mr_cat_choices = (('1', 'Contributions'), ('2', 'Advances'),('3', 'Interest'),('4', 'Penalties'))
+		mr_cat_choices = (('1', 'Contributions'), ('2', 'Advances'),('3', 'Interest'),('4', 'Penalties'),('G', 'General'))
 		mr_pay_choices = (('1', 'Cheque'), ('2', 'Transfer'), ('3', 'Cash'), ('4', 'Mobile Money'))
 		mr_num = models.AutoField(verbose_name='Number', primary_key=True, help_text='System generated number uniquely identifying a group member transaction')
 		mr_gr_num = models.ForeignKey(GroupTab, on_delete=models.CASCADE, verbose_name='Group', help_text='Group to which the member belongs')
@@ -173,7 +173,6 @@ class MemberRecord(models.Model):
 			return reverse('edit', kwargs={'pk': self.pk})
 
 	#Receipt Class - Table contains record of receipt for a payment
-
 class Receipt(models.Model):
 		rc_status_choices = (('1', 'Live'), ('2', 'Reversed'), ('3', 'Cancelled'))
 		rc_proc_choices = (('1', 'Pending'), ('2', 'Processed'))
@@ -181,7 +180,8 @@ class Receipt(models.Model):
 		rc_num = models.AutoField(verbose_name='Number', primary_key=True, help_text='System generated number uniquely identifying a receipt')
 		rc_gr_num = models.ForeignKey(GroupTab, on_delete=models.CASCADE, verbose_name='Group', help_text='Group to which the member belongs')
 		rc_gm_num = models.ForeignKey(GroupMember, on_delete=models.CASCADE, verbose_name='Member', help_text='The member belongs')
-		rc_mr_num = models.ForeignKey(MemberRecord, on_delete=models.CASCADE, verbose_name='Member Record', help_text='The member transaction')
+		#rc_mr_num = models.ForeignKey(MemberRecord, related_name='memb_trans',on_delete=models.CASCADE, verbose_name='Member Record', help_text='The member transaction')
+		rc_mr_num1 = models.CharField(verbose_name='Member Record',max_length=20, default=0, help_text='The member transaction to which funds to be applied')
 		rc_period = models.IntegerField(verbose_name='Period', help_text='Period in which transaction occurred')
 		rc_trans_date = models.DateTimeField(verbose_name='Transaction Date', help_text='Transaction Date')
 		rc_value_date = models.DateTimeField(verbose_name='Value Date', help_text='Transaction s value date',  blank=True, null=True)
@@ -189,7 +189,7 @@ class Receipt(models.Model):
 		rc_pamount = models.DecimalField(verbose_name='Projected Amount', max_digits=15, default=0, decimal_places=2, help_text='The projected transaction amount')
 		rc_aamount = models.DecimalField(verbose_name='Actual Amount', max_digits=15, default=0, decimal_places=2, help_text='The actual transaction amount')
 		rc_balance = models.DecimalField(verbose_name='Balance', max_digits=15, default=0, decimal_places=2, help_text='The balance on the advance')
-		rc_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=1, help_text='The payment reference')
+		rc_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=20, help_text='The payment reference')
 		rc_dr_cr = models.CharField(verbose_name='Debit/Credit', max_length=1, help_text='The Transaction is a debit or a credit')
 		rc_paid = models.CharField(verbose_name='Paid', max_length=1, help_text='Indicates payment in settlement for this transaction', default='N')
 		rc_status = models.CharField(verbose_name='Status', max_length=1, choices=rc_status_choices, help_text='Indicates the status of the transaction')
@@ -272,7 +272,7 @@ class Advance(models.Model):
 		av_aamount = models.DecimalField(verbose_name='Advanced Amount', max_digits=15, default=0, decimal_places=2, help_text='Advanced amount')
 		av_balance = models.DecimalField(verbose_name='Balance Amount', max_digits=15, default=0, decimal_places=2, help_text='Balance on the Advance')
 		av_repay_plan = models.IntegerField(verbose_name='Repayment Plan', default=1, help_text='Repayment Plan')
-		av_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=1, help_text='The payment reference')
+		av_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=20, help_text='The payment reference')
 		av_disb = models.CharField(verbose_name='Disbursed ?', max_length=1, choices=av_disb_choices, help_text='Indicates advance waas disbursed' )
 		av_status = models.CharField(verbose_name='Status', max_length=1, choices=av_status, help_text='Indicates the status of the advance')
 		av_processed = models.CharField(verbose_name='Processed ?', max_length=1, choices=av_proc_choices, default='1', help_text='Indicates the processing status')

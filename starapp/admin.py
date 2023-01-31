@@ -46,7 +46,7 @@ admin.site.register(MemberRecord, MemberRecordAdmin)
 
 # Define the Receipt admin class
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display = ('rc_num','rc_gr_num','rc_gm_num','rc_mr_num','rc_period','rc_trans_date','rc_value_date','rc_due_date',
+    list_display = ('rc_num','rc_gr_num','rc_gm_num','rc_mr_num1','rc_period','rc_trans_date','rc_value_date','rc_due_date',
 			'rc_pamount','rc_aamount','rc_pay_ref','rc_dr_cr','rc_paid','rc_status','rc_processed','rc_pay_type')
 
 # Register the Receipt admin class with the associated model

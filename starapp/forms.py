@@ -1,10 +1,10 @@
 from django import forms
 from django.forms import ModelForm
 from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Fund, Advance, AdvanceTrans
-#from bootstrap_datepicker_plus import DatePickerInput  #, TimePickerInput, DateTimePickerInput, MonthPickerInput, YearPickerInput
-#from django import forms
-#from crispy_forms.helper import FormHelper
-#from crispy_forms.layout import Layout, Submit, Row, Column
+from django.db import models
+from .models import PostCategory, PostOrigin,BlogPost,PostContribution
+from django import forms
+
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 
 
@@ -62,18 +62,11 @@ class MemberRecordForm(forms.ModelForm):
 class ReceiptForm(forms.ModelForm):
 	class Meta:
 		model = Receipt
-		fields = ['rc_num','rc_period','rc_gr_num','rc_gm_num','rc_mr_num','rc_trans_date',
+		fields = ['rc_num','rc_period','rc_gr_num','rc_gm_num','rc_mr_num1','rc_trans_date','rc_pamount',
 			'rc_aamount','rc_pay_ref','rc_dr_cr','rc_paid','rc_status','rc_processed','rc_pay_type']
 		widgets = {
 			'rc_trans_date': DateTimePickerInput(),
 		}
-
-# creating the Fund form
-class FundForm(forms.ModelForm):
-	class Meta:
-		model = Fund
-		fields = ['fd_num','fd_period','fd_trans_date','fd_pamount','fd_aamount','fd_pay_ref','fd_paid',
-				  'fd_source','fd_status','fd_processed']
 
 # creating the Advance form
 class AdvanceForm(forms.ModelForm):
@@ -105,16 +98,10 @@ class GenTransForm(forms.Form):
 # Start Blog forms
 
 # Start Interactions Form
+
 from django.db import models
-#from django import forms
 from .models import PostCategory, PostOrigin,BlogPost,PostContribution
-
-#from .models import PostContribution
-#from django import forms
-
 from django import forms
-#from .models import BlogPost, PostContribution
-
 class PostCategoryForm(forms.Form):
     ct_code = models.CharField(verbose_name='Code', max_length=10, help_text='Enter code uniquely identifying post category')
     ct_desc = models.CharField(max_length=50, blank=True, null=True, help_text='The description of the category')

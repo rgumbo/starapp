@@ -28,9 +28,9 @@ urlpatterns = [
 
 # Member payments
     path('contlist', views.ContListView, name='contlist'),
-    path('memberpay/<int:mr_num>/<int:gm_num>/<int:gr_num>/<str:category>',views.MemberPayView, name='memberpay'),
+    path('memberpay/<int:mr_num>/<int:mr_period>/<int:gm_num>/<int:gr_num>/(?P<amount>\d+\.\d({2})/$',views.MemberPayView, name='memberpay'),
 
-#Generate member contributions
+    #Generate member contributions
     path('gencont', views.GenContView.as_view(), name='gencont'),
 
 #Generate member transactions
@@ -43,10 +43,10 @@ urlpatterns = [
     path('deleteadvances/<str:pk>/', views.DeleteAdvance, name='deleteadvances'),
 
 #Reports
-    path('g_position', views.g_position3, name='g_position'),
-    path('g_fund', views.g_fund, name='g_fund'),
-    path('g_rec', views.g_receipts, name='g_rec'),
+    path('g_position', views.g_position, name='g_position'),
     path('g_position_tab', views.TransHTMxTableView1.as_view(), name='g_position_tab'),
+    path('g_position_tab1', views.TransHTMxTableView.as_view(), name='g_position_tab1'),
+    path('memberrecord_htmx', views.TransHTMxTable1, name='memberrecord_htmx'),
 
 #Blog App
     path('bloghome', views.PostList.as_view(), name='bloghome'),
