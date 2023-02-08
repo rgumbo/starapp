@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
 
-#    path('homepage', views.HomePageView, name='homepage'),
+#   path('homepage', views.HomePageView, name='homepage'),
     path('homeindex', views.HomeIndexView, name='homeindex'),
 
     path('addperiod', views.PeriodView, name='addperiod'),
@@ -28,13 +28,16 @@ urlpatterns = [
 
 # Member payments
     path('contlist', views.ContListView, name='contlist'),
-    path('memberpay/<int:mr_num>/<int:mr_period>/<int:gm_num>/<int:gr_num>/(?P<amount>\d+\.\d({2})/$',views.MemberPayView, name='memberpay'),
+    path('memberpay/<int:mr_num>/<int:mr_period>/<int:gm_num>/<int:gr_num>/str<amount>/', views.MemberPayView, name='memberpay'),
+    path('advlist', views.AdvListView, name='advtlist'),
+    path('advpay/<int:ir_num>/<int:ir_period>/<int:gm_num>/<int:gr_num>/str<balance>/<str:int_date>/', views.AdvPayView, name='advpay'),
 
     #Generate member contributions
     path('gencont', views.GenContView.as_view(), name='gencont'),
 
 #Generate member transactions
     path('gentrans', views.GenTransView.as_view(), name='gentrans'),
+    path('otherrans', views.OtherTransView, name='otherrans'),
 
     path('addadvances', views.AdvanceView, name='addadvances'),
     path('advancesdetail/<str:pk>/', views.AdvanceDetailView.as_view(), name='advancesdetail'),

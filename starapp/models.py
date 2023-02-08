@@ -13,8 +13,7 @@ from django.template.defaultfilters import slugify
 
 	# Create your models here.
 
-	#Period Class - Table contains record of opertaing period
-
+#Period Class - Table contains record of operating period
 class Period(models.Model):
 		pr_statuses = (('1', 'Open'), ('2', 'Close'))
 		pr_process_choices = (('1', 'Processed'), ('2', 'Pending'))
@@ -26,6 +25,7 @@ class Period(models.Model):
 		pr_proc_status = models.CharField(verbose_name='Processing Status', max_length=1, default='2' , choices=pr_process_choices, help_text='The group s status')
 		pr_int_rate = models.DecimalField(verbose_name='Interest rate', max_digits=5, decimal_places=2, default=0, help_text='Applicable interest rate')
 		pr_amount = models.DecimalField(verbose_name='Contribution Amount', max_digits=15, default=0, decimal_places=2, help_text='The amount members are expected to contribute in the period')
+		pr_int_days = models.IntegerField(verbose_name='Interest Days', default=0,help_text='The umber of days to elapse before interest is charged')
 		ad_user_c = models.CharField(max_length=30, blank=True, null=True, help_text='The user creating the record')
 		ad_user_a = models.CharField(max_length=30, blank=True, null=True, help_text='The last amending user')
 		ad_date_c = models.DateTimeField(auto_now_add=True, help_text='Date record was created')
@@ -34,22 +34,17 @@ class Period(models.Model):
 		ad_device_a = models.CharField(max_length=100, blank=True, null=True, help_text='The Last amending device')
 		ad_ipadress_c = models.CharField(max_length=50, blank=True, null=True, help_text='The record creating ip address')
 		ad_ipadress_a = models.CharField(max_length=50, blank=True, null=True, help_text='The last amending ip address')
-
 		class Meta:
 			ordering = ['pr_num']
 			verbose_name = 'Period'
-
 		def __str__(self):
 			return self.pr_status
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.pr_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	# GroupTab Class - Table contains record of fund groups
-
+# GroupTab Class - Table contains record of fund groups
 class GroupTab(models.Model):
 		gr_status = (('1', 'Application'), ('2', 'Activated'), ('3', 'Inactivated'))
 		gr_cat_choices = (('1', 'Savings Club'), ('2', 'General Membership'), ('3', 'Congregational'), ('4', 'Others'))
@@ -73,18 +68,14 @@ class GroupTab(models.Model):
 		class Meta:
 			ordering = ['gr_num']
 			verbose_name = 'Group ID'
-
 		def __str__(self):
 			return self.gr_name
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.gr_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	#GroupMember Class - Table contains record of fund groups members
-
+#GroupMember Class - Table contains record of fund groups members
 class GroupMember(models.Model):
 		gm_status = (('1', 'Application'), ('2', 'Activated'), ('3', 'Inactivated'))
 		gm_cat_choices = (('1', 'Member'), ('2', 'Borrower'), ('3', 'Type 3'), ('4', 'Type 4'))
@@ -117,18 +108,14 @@ class GroupMember(models.Model):
 		class Meta:
 			ordering = ['gm_num']
 			verbose_name = 'Member'
-
 		def __str__(self):
 			return self.gm_sname + '-' + self.gm_fname
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.gm_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	#MemberRecord Class - Table contains record of fund groups members transctions
-
+#MemberRecord Class - Table contains record of fund groups members transctions
 class MemberRecord(models.Model):
 		mr_status_choices = (('1', 'Live'), ('2', 'Reversed'), ('3', 'Cancelled'))
 		mr_cat_choices = (('1', 'Contributions'), ('2', 'Advances'),('3', 'Interest'),('4', 'Penalties'),('G', 'General'))
@@ -143,11 +130,11 @@ class MemberRecord(models.Model):
 		mr_pamount = models.DecimalField(verbose_name='Projected Amount', max_digits=15, default=0, decimal_places=2, help_text='The projected transaction amount')
 		mr_aamount = models.DecimalField(verbose_name='Actual Amount', max_digits=15, default=0, decimal_places=2, help_text='The actual transaction amount')
 		mr_units = models.IntegerField(verbose_name='Units Held',default=1, help_text='The number of units held')
-		mr_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=20, help_text='The payment reference')
+		mr_pay_ref = models.CharField(verbose_name='Payment Ref',   blank=True, null=True, max_length=20, help_text='The payment reference')
 		mr_category = models.CharField(verbose_name='Category', max_length=1, default='1',choices=mr_cat_choices, help_text='Indicates the status of the transaction')
-		mr_dr_cr = models.CharField(verbose_name='Debit/Credit', max_length=1, help_text='The Transaction is a debit or a credit')
+		mr_dr_cr = models.CharField(verbose_name='Debit/Credit', max_length=1, default='D', help_text='The Transaction is a debit or a credit')
 		mr_paid = models.CharField(verbose_name='Paid', max_length=1, help_text='Indicates payment in settlement for this transaction', default='N')
-		mr_status = models.CharField(verbose_name='Status', max_length=1, choices=mr_status_choices, help_text='Indicates the status of the transaction')
+		mr_status = models.CharField(verbose_name='Status',default='1', max_length=1, choices=mr_status_choices, help_text='Indicates the status of the transaction')
 		mr_processed = models.CharField(verbose_name='Processed', max_length=1, help_text='Indicates transaction has been processed', default='N')
 		mr_pay_type = models.CharField(verbose_name='Payment Type',blank=True, null=True, max_length=1, choices=mr_pay_choices, help_text='Payment type', default='N')
 		ad_user_c = models.CharField(max_length=30, blank=True, null=True, help_text='The user creating the record')
@@ -162,17 +149,14 @@ class MemberRecord(models.Model):
 		class Meta:
 			ordering = ['mr_num']
 			verbose_name = 'Member Record'
-
 		def __str__(self):
 			return self.mr_status
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.mr_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	#Receipt Class - Table contains record of receipt for a payment
+#Receipt Class - Table contains record of receipt for a payment
 class Receipt(models.Model):
 		rc_status_choices = (('1', 'Live'), ('2', 'Reversed'), ('3', 'Cancelled'))
 		rc_proc_choices = (('1', 'Pending'), ('2', 'Processed'))
@@ -190,9 +174,9 @@ class Receipt(models.Model):
 		rc_aamount = models.DecimalField(verbose_name='Actual Amount', max_digits=15, default=0, decimal_places=2, help_text='The actual transaction amount')
 		rc_balance = models.DecimalField(verbose_name='Balance', max_digits=15, default=0, decimal_places=2, help_text='The balance on the advance')
 		rc_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=20, help_text='The payment reference')
-		rc_dr_cr = models.CharField(verbose_name='Debit/Credit', max_length=1, help_text='The Transaction is a debit or a credit')
+		rc_dr_cr = models.CharField(verbose_name='Debit/Credit', default='D',max_length=1, help_text='The Transaction is a debit or a credit')
 		rc_paid = models.CharField(verbose_name='Paid', max_length=1, help_text='Indicates payment in settlement for this transaction', default='N')
-		rc_status = models.CharField(verbose_name='Status', max_length=1, choices=rc_status_choices, help_text='Indicates the status of the transaction')
+		rc_status = models.CharField(verbose_name='Status',default='1', max_length=1, choices=rc_status_choices, help_text='Indicates the status of the transaction')
 		rc_processed = models.CharField(verbose_name='Processed', max_length=1, choices=rc_proc_choices, help_text='Indicates transaction has been processed', default='N')
 		rc_pay_type = models.CharField(verbose_name='Payment Type', max_length=1, choices=rc_pay_choices, help_text='Payment type', default='3')
 		ad_user_c = models.CharField(max_length=30, blank=True, null=True, help_text='The user creating the record')
@@ -207,18 +191,14 @@ class Receipt(models.Model):
 		class Meta:
 			ordering = ['rc_num']
 			verbose_name = 'Receipt'
-
 		def __str__(self):
 			return self.rc_status
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.rc_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	#Fund Class - Table contains record amount put in the fund per period
-
+#Fund Class - Table contains record amount put in the fund per period
 class Fund(models.Model):
 		fd_status = (('1', 'Available'), ('2', 'Committed'))
 		fd_source_choices = (('1', 'Contributions'), ('2', 'Earnings'))
@@ -244,18 +224,14 @@ class Fund(models.Model):
 		class Meta:
 			ordering = ['fd_num']
 			verbose_name = 'Fund'
-
 		def __str__(self):
 			return self.fd_status
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.fd_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	#Advance Class - Table contains record of advances to borrowers
-
+#Advance Class - Table contains record of advances to borrowers
 class Advance(models.Model):
 		av_status = (('1', 'Applied'), ('2', 'Approved'), ('3', 'Declined'))
 		av_disb_choices = (('1', 'Pending'), ('2', 'Disbursed'))
@@ -285,68 +261,55 @@ class Advance(models.Model):
 		ad_device_a = models.CharField(max_length=100, blank=True, null=True, help_text='The Last amending device')
 		ad_ipadress_c = models.CharField(max_length=50, blank=True, null=True, help_text='The record creating ip address')
 		ad_ipadress_a = models.CharField(max_length=50, blank=True, null=True, help_text='The last amending ip address')
-
 		class Meta:
 			ordering = ['av_num']
 			verbose_name = 'Advance'
-
 		def __str__(self):
 			return self.av_status
-
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.av_num)])
-
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-	#Advance Class - Table contains record of advances to borrowers
-
-class AdvanceTrans(models.Model):
-		at_status_choices = (('1', 'Live'), ('2', 'Pending'), ('3', 'Reversed'))
-		at_type_choices = (('1', 'Installment'), ('2', 'Interest'), ('3', 'Penalty'))
-		at_pay_choices = (('1', 'Cheque'), ('2', 'Transfer'), ('3', 'Cash'), ('4', 'Mobile Money'))
-		at_num = models.AutoField(verbose_name='Number', primary_key=True, help_text='System generated number uniquely identifying advance transaction')
-		at_av_num = models.ForeignKey(Advance, on_delete=models.CASCADE, verbose_name='Advance', help_text='Advance from which this transaction is generated')
-		at_gm_num = models.ForeignKey(GroupMember, on_delete=models.CASCADE, verbose_name='Member', help_text='The member to which the transaction belongs')
-		at_period = models.IntegerField(verbose_name='Period', help_text='Period in which transaction occurred')
-		at_trans_date = models.DateTimeField(verbose_name='Transaction Date', help_text='Transaction Date')
-		at_value_date = models.DateTimeField(verbose_name='Value Date', help_text='Transaction s value date',  blank=True, null=True)
-		at_due_date = models.DateTimeField(verbose_name='Due Date', help_text='Transaction s due date',  blank=True, null=True)
-		at_amount = models.DecimalField(verbose_name='Transaction Amount', max_digits=15, default=0, decimal_places=2, help_text='Transaction amount')
-		at_bamount = models.DecimalField(verbose_name='Balance', max_digits=15, default=0, decimal_places=2, help_text='Balance amount')
-		at_pay_ref = models.CharField(verbose_name='Payment Ref', max_length=1, help_text='The payment reference')
-		at_status = models.CharField(verbose_name='Status', max_length=1, choices=at_status_choices, help_text='Indicates the status of the Transaction')
-		at_type = models.CharField(verbose_name='Transaction Type', max_length=1, choices=at_type_choices, help_text='Indicates the status of the Transaction')
-		at_dr_cr = models.CharField(verbose_name='DR/CR', max_length=1, help_text='Indicates whether transaction is debit or credit')
-		at_pay_type = models.CharField(verbose_name='Payment Type', max_length=1, choices=at_pay_choices, help_text='Payment Type')
+# Interest record class - maintains records for basis of charging interest
+class InterestRecord(models.Model):
+		ir_status_choices = (('1', 'Live'), ('2', 'Reversed'), ('3', 'Cancelled'))
+		ir_cat_choices = (('1', 'Contributions'), ('2', 'Advances'), ('3', 'Interest'), ('4', 'Penalties'), ('G', 'General'))
+		ir_num = models.AutoField(verbose_name='Number', primary_key=True, help_text='System generated number uniquely identifying an interest record')
+		ir_gr_num = models.ForeignKey(GroupTab, on_delete=models.CASCADE, verbose_name='Group', help_text='Group to which the member belongs')
+		ir_gm_num = models.ForeignKey(GroupMember, on_delete=models.CASCADE, related_name='memberint', verbose_name='Member', help_text='The member belongs')
+		ir_av_num = models.IntegerField(verbose_name='Advance', blank=True,	null=True, help_text='The advance being recorded')
+		ir_period = models.IntegerField(verbose_name='Period', help_text='Period in which transaction occurred')
+		ir_trans_date = models.DateTimeField(verbose_name='Transaction Date', help_text='Transaction Date')
+		ir_from_date = models.DateTimeField(verbose_name='From Date', help_text='Interest start date', blank=True,	null=True)
+		ir_to_date = models.DateTimeField(verbose_name='To Date', help_text='Interest end date', blank=True, null=True)
+		ir_int_bal = models.DecimalField(verbose_name='Int. Balance', max_digits=15, default=0, decimal_places=2, help_text='Balance on which interest is charged - Before payment')
+		ir_balance = models.DecimalField(verbose_name='Actual Amount', max_digits=15, default=0, decimal_places=2, help_text='Balance - After payment')
+		ir_days = models.IntegerField(verbose_name='Days', default=0, help_text='Number of days on to charge interest on')
+		ir_pay_ref = models.CharField(verbose_name='Payment Ref', blank=True, null=True, max_length=20, help_text='The payment reference')
+		ir_category = models.CharField(verbose_name='Category', max_length=1, default='1', choices=ir_cat_choices, help_text='Indicates the status of the transaction')
+		ir_paid = models.CharField(verbose_name='Paid', max_length=1, help_text='Indicates payment in settlement for this transaction', default='N')
+		ir_status = models.CharField(verbose_name='Status', default='1', max_length=1, choices=ir_status_choices, help_text='Indicates the status of the transaction')
+		ir_processed = models.CharField(verbose_name='Processed', max_length=1,	help_text='Indicates transaction has been processed', default='N')
 		ad_user_c = models.CharField(max_length=30, blank=True, null=True, help_text='The user creating the record')
 		ad_user_a = models.CharField(max_length=30, blank=True, null=True, help_text='The last amending user')
-		ad_date_c = models.DateTimeField(auto_now_add=True, help_text='Date record was created')
-		ad_date_a = models.DateTimeField(auto_now=True, help_text='Date record was last amended')
+		ad_date_c = models.DateTimeField(auto_now_add=True, blank=True, null=True, help_text='Date record was created')
+		ad_date_a = models.DateTimeField(auto_now=True, blank=True, null=True, help_text='Date record was last amended')
 		ad_device_c = models.CharField(max_length=100, blank=True, null=True, help_text='The Device creating the record')
 		ad_device_a = models.CharField(max_length=100, blank=True, null=True, help_text='The Last amending device')
 		ad_ipadress_c = models.CharField(max_length=50, blank=True, null=True, help_text='The record creating ip address')
 		ad_ipadress_a = models.CharField(max_length=50, blank=True, null=True, help_text='The last amending ip address')
-
 		class Meta:
-			ordering = ['at_num']
-			verbose_name = 'Advance Transaction'
-
+			ordering = ['ir_num']
+			verbose_name = 'Interest Record'
 		def __str__(self):
-			return self.at_dr_cr
-
+			return self.ir_status
 		def get_absolute_url(self):
-			return reverse('Index', args=[str(self.at_num)])
-
+			return reverse('Index', args=[str(self.ir_num)])
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 
-
-
 #Start Blog Models
-
-#Start Interation Models
-
 class PostCategory(models.Model):
     ct_code = models.CharField(verbose_name='Code', max_length=10, primary_key=True,help_text='Enter code uniquely identifying post category')
     ct_desc = models.CharField(max_length=50, blank=True, null=True, help_text='The description of the category')

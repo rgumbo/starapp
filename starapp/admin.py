@@ -6,8 +6,8 @@ from django.db import models
 
 # Register your models here.
 
-from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Fund, Advance, AdvanceTrans,BlogPost\
-    , PostContribution,PostCategory,PostOrigin,PostContribution
+from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Fund, Advance, BlogPost\
+    , InterestRecord, PostContribution,PostCategory,PostOrigin,PostContribution
 
 #Start StarApp Admin Config
 
@@ -68,13 +68,13 @@ class AdvanceAdmin(admin.ModelAdmin):
 # Register the Advance admin class with the associated model
 admin.site.register(Advance, AdvanceAdmin)
 
-# Define the AdvanceTrans admin class
-class AdvanceTransAdmin(admin.ModelAdmin):
-    list_display = ('at_num','at_av_num','at_gm_num','at_period','at_trans_date','at_value_date','at_due_date','at_amount',
-			'at_bamount','at_pay_ref','at_status','at_type','at_dr_cr','at_pay_type')
+# Define the Interest Record admin class
+class InterestRecordAdmin(admin.ModelAdmin):
+    list_display = ('ir_num','ir_gr_num','ir_gm_num','ir_av_num','ir_period','ir_trans_date','ir_from_date','ir_to_date',
+'ir_int_bal','ir_balance','ir_days','ir_pay_ref','ir_category','ir_paid','ir_status','ir_processed')
 
-# Register the AdvanceTrans admin class with the associated model
-admin.site.register(AdvanceTrans, AdvanceTransAdmin)
+# Register the GroupMember admin class with the associated model
+admin.site.register(InterestRecord, InterestRecordAdmin)
 
 # Block Models admin registration Start here
 # Define the PostCategory admin class

@@ -1,5 +1,5 @@
 from django import forms
-from .models import GroupMember, MemberRecord
+from .models import GroupMember, MemberRecord, InterestRecord
 import django_filters
 #from decimal import Decimal
 from django.db.models import Q
@@ -9,6 +9,11 @@ class MembContFilter(django_filters.FilterSet):
     class Meta:
         model = MemberRecord
         fields = ['mr_period', 'mr_category', 'mr_gm_num']
+
+class MembAdvFilter(django_filters.FilterSet):
+    class Meta:
+        model = InterestRecord
+        fields = ['ir_period', 'ir_gm_num']
 
 #Filter for table
 

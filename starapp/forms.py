@@ -1,12 +1,10 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Fund, Advance, AdvanceTrans
+from .models import Period, GroupTab, GroupMember, MemberRecord, Receipt, Fund, Advance, InterestRecord
 from django.db import models
 from .models import PostCategory, PostOrigin,BlogPost,PostContribution
 from django import forms
-
 from bootstrap_datepicker_plus.widgets import DateTimePickerInput
-
 
 #from django.db import models
 
@@ -55,7 +53,17 @@ class MemberRecordForm(forms.ModelForm):
 		widgets = {
 			'mr_trans_date': DateTimePickerInput(),
 			'mr_value_date': DateTimePickerInput(),
-			'pr_due_date': DateTimePickerInput(),
+			'mr_due_date': DateTimePickerInput(),
+		}
+class MemberTransForm(forms.ModelForm):
+	class Meta:
+		model = MemberRecord
+		fields = ['mr_num','mr_gr_num','mr_gm_num','mr_period','mr_trans_date','mr_value_date','mr_due_date',
+			'mr_aamount','mr_category']
+		widgets = {
+			'mr_trans_date': DateTimePickerInput(),
+			'mr_value_date': DateTimePickerInput(),
+			'mr_due_date': DateTimePickerInput(),
 		}
 
 # creating the Receipt form
