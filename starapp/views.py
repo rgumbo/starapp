@@ -44,6 +44,10 @@ from django.db.models.functions import Round
 import getpass
 from os import environ, getcwd
 from decimal import *
+
+# Getting variables for filtering transactions by user groups
+
+l_gr_num = 0
 def HomeIndexView(Request):
     template = 'homeindex.html'
     context = {}
@@ -62,27 +66,39 @@ def index(request):
     advance = 0
     rep_amnt = 0
 
+    # user = auth.get_user(request)
+    group = request.user.groups.values_list('name', flat=True).first()
+
+    # group = request.user.groups.name
+    global l_gr_num
+    l_gr_num = 0
+    if group :
+        g_gr_num = GroupTab.objects.filter(gr_code=group).values('gr_num')
+
+        if g_gr_num :
+            l_gr_num = g_gr_num[0]['gr_num']
+
     # Count of members
-    num_members = GroupMember.objects.all().count()
+    num_members = GroupMember.objects.filter(gm_gr_num=l_gr_num).count()
 
     # Contributions - Dues and Payments
-    tot_cont = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='1').aggregate(tot_cont=Sum('mr_pamount'))
-    cont_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='1').aggregate(cont_pay=Sum('mr_aamount'))
+    tot_cont = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='1',mr_gr_num=l_gr_num).aggregate(tot_cont=Sum('mr_pamount'))
+    cont_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='1',mr_gr_num=l_gr_num).aggregate(cont_pay=Sum('mr_aamount'))
 
     #Advances - Dues and Payments
-    tot_adv = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='2').aggregate(tot_adv=Sum('mr_aamount'))
-    adv_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='2').aggregate(adv_pay=Sum('mr_aamount'))
+    tot_adv = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='2',mr_gr_num=l_gr_num).aggregate(tot_adv=Sum('mr_aamount'))
+    adv_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='2',mr_gr_num=l_gr_num).aggregate(adv_pay=Sum('mr_aamount'))
 
     # Interest  - Dues and Payments
-    tot_int = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='3').aggregate(tot_int=Sum('mr_aamount'))
-    int_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='3').aggregate(int_pay=Sum('mr_aamount'))
+    tot_int = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='3',mr_gr_num=l_gr_num).aggregate(tot_int=Sum('mr_aamount'))
+    int_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='3',mr_gr_num=l_gr_num).aggregate(int_pay=Sum('mr_aamount'))
 
     # Penalties - Dues and Payments
-    tot_pen = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='4').aggregate(tot_pen=Sum('mr_aamount'))
-    pen_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='4').aggregate(pen_pay=Sum('mr_aamount'))
+    tot_pen = MemberRecord.objects.filter(mr_dr_cr='D',mr_category='4',mr_gr_num=l_gr_num).aggregate(tot_pen=Sum('mr_aamount'))
+    pen_pay = MemberRecord.objects.filter(mr_dr_cr='C',mr_category='4',mr_gr_num=l_gr_num).aggregate(pen_pay=Sum('mr_aamount'))
 
     # Total receipts
-    tot_rec = MemberRecord.objects.filter(mr_dr_cr='C').aggregate(tot_rec=Sum('mr_aamount'))
+    tot_rec = MemberRecord.objects.filter(mr_dr_cr='C',mr_gr_num=l_gr_num).aggregate(tot_rec=Sum('mr_aamount'))
 
     # Value of Fund
 
@@ -118,8 +134,11 @@ def index(request):
 
 #Group Position View - Table implentation
 class TransHTMxTableView(SingleTableMixin, FilterView):
+    #global l_gr_num
+    l_gr_num = 1
+
     table_class = TransHTMxTable
-    queryset = MemberRecord.objects.all()
+    queryset = MemberRecord.objects.filter(mr_gr_num=l_gr_num)
     filterset_class = TransFilter
     paginate_by = 15
 
@@ -135,22 +154,27 @@ class TransHTMxTableView(SingleTableMixin, FilterView):
 class TransHTMxTable1(tables.Table):
    class Meta:
         model = MemberRecord
-        fields = ('mr_num','mr_gm_num', 'mr_period','mr_trans_date', 'mr_units','mr_dr_cr',
+        fields = ('mr_num','mr_gr_num','mr_gm_num', 'mr_period','mr_trans_date', 'mr_units','mr_dr_cr',
               'mr_category','mr_pamount', 'mr_aamount')
 
 # This View will render table
 class TransHTMxTableView1(tables.SingleTableView):
-   table_class = TransHTMxTable1
-   queryset = MemberRecord.objects.all()
-   template_name = "member_record.html"
+    global l_gr_num
+
+    table_class = TransHTMxTable1
+    def get_queryset(self):
+        return MemberRecord.objects.filter(mr_gr_num=l_gr_num)
+
+    template_name = "member_record.html"
 
 # home view for Periods. Periods are displayed in a list
 class PeriodIndexView(ListView):
+    global l_gr_num
     template_name = 'starapp/period/index.html'
     context_object_name = 'period_list'
 
     def get_queryset(self):
-        return Period.objects.all()
+        return Period.objects.filter(pr_gr_num=l_gr_num)
 
 # Detail view (view Period detail)
 class PeriodDetailView(DetailView):
@@ -185,11 +209,11 @@ def DeletePeriod(request, pk, template_name='starapp/period/confirm_delete.html'
 
 # home view for the group. Groups are displayed in a list
 class GroupIndexView(ListView):
+    global l_gr_num
     template_name = 'starapp/groups/index.html'
     context_object_name = 'GroupTab_list'
-
     def get_queryset(self):
-        return GroupTab.objects.all()
+        return GroupTab.objects.filter(gr_num=l_gr_num)
 
 # Detail view (view Group detail)
 class GroupTabDetailView(DetailView):
@@ -226,11 +250,13 @@ def DeleteGroupTab(request, pk, template_name='starapp/groups/confirm_delete.htm
 # home view for Members. Members are displayed in a list
 
 class MemberIndexView(ListView):
+
+    global l_gr_num
     template_name = 'starapp/members/index.html'
 
     context_object_name = 'Member_list'
     def get_queryset(self):
-        return GroupMember.objects.all()
+        return GroupMember.objects.filter(gm_gr_num=l_gr_num)
 
 # Detail view (view Member detail)
 class MemberDetailView(DetailView):
@@ -319,9 +345,10 @@ def SubmitPayView(request, pk, gm_num,gr_num):
 # Borrower payment
 
 def ContListView(request):
+        global l_gr_num
 
         total = 0
-        cont_list = MemberRecord.objects.exclude(mr_category='2').values('mr_num', 'mr_gr_num','mr_gm_num', 'mr_gm_num__gm_sname',
+        cont_list = MemberRecord.objects.filter(mr_gr_num=l_gr_num).exclude(mr_category='2').values('mr_num', 'mr_gr_num','mr_gm_num', 'mr_gm_num__gm_sname',
             'mr_gm_num__gm_fname','mr_period', 'mr_trans_date', 'mr_value_date', 'mr_due_date',
             'mr_pamount', 'mr_aamount', 'mr_units', 'mr_pay_ref', 'mr_dr_cr',
              'mr_paid', 'mr_status', 'mr_processed','mr_pay_type', 'mr_category').order_by('mr_period', 'mr_gm_num')
@@ -341,8 +368,9 @@ class ContListView1(ListView):
             'mr_value_date', 'mr_due_date','mr_pamount', 'mr_aamount', 'mr_units', 'mr_pay_ref', 'mr_dr_cr',
              'mr_paid', 'mr_status', 'mr_processed','mr_pay_type', 'mr_category').order_by('mr_period', 'mr_gm_num')
 def AdvListView(request):
+        global l_gr_num
         total = 0
-        cont_list = InterestRecord.objects.values('ir_num', 'ir_gr_num', 'ir_gm_num', 'ir_av_num','ir_gm_num__gm_sname',
+        cont_list = InterestRecord.objects.filter(ir_gr_num=l_gr_num).values('ir_num', 'ir_gr_num', 'ir_gm_num', 'ir_av_num','ir_gm_num__gm_sname',
                 'ir_gm_num__gm_fname', 'ir_period', 'ir_trans_date', 'ir_from_date', 'ir_to_date', 'ir_int_bal',
                 'ir_balance', 'ir_days', 'ir_pay_ref', 'ir_category', 'ir_paid', 'ir_status', 'ir_processed').order_by('ir_period','ir_gm_num')
 
@@ -436,12 +464,12 @@ def AdvPayView(request, ir_num, ir_period, gm_num, gr_num, balance,int_date):
             f_processed = form.cleaned_data['rc_processed']
             f_pay_type = form.cleaned_data['rc_pay_type']
 
-            l_int_date = datetime.datetime.strptime(int_date,'%Y-%m-%d %H:%M:%S%z')
-            rem_bal   = (f_pamount - f_aamount)
-            int_prev_bal    =  f_pamount
-            f_pamount = (f_pamount* -1)
-            f_aamount = (f_aamount* -1)
-            int_days = (f_trans_date - l_int_date).days
+            l_int_date      =   datetime.datetime.strptime(int_date,'%Y-%m-%d %H:%M:%S%z')
+            rem_bal         =   (f_pamount - f_aamount)
+            int_prev_bal    =   f_pamount
+            f_pamount       =   (f_pamount* -1)
+            f_aamount       =   (f_aamount* -1)
+            int_days        =   (f_trans_date - l_int_date).days
 
             form.save()
 
@@ -493,11 +521,11 @@ def AdvPayView(request, ir_num, ir_period, gm_num, gr_num, balance,int_date):
 
 # home view for Advance. Advance are displayed in a list
 class AdvanceIndexView(ListView):
+    global l_gr_num
     template_name = 'starapp/advances/index.html'
     context_object_name = 'advance_list'
-
     def get_queryset(self):
-        return Advance.objects.all()
+        return Advance.objects.filter(av_gr_num=l_gr_num)
 
 # Detail view (view Advance detail)
 class AdvanceDetailView(DetailView):
@@ -602,6 +630,7 @@ def DeleteAdvance(request, pk, template_name='starapp/advances/confirm_delete.ht
 
 # Views for Payment process
 class LedgerListView(View):
+        global l_gr_num
         form_class = PayListForm
         template_name = 'starapp/payments/mainaccessl.html'
 
@@ -618,7 +647,7 @@ class LedgerListView(View):
                 trans_cat = form.cleaned_data['trans_cat']
                 pr_period = form.cleaned_data['trans_cat']
 
-                cont_list = MemberRecord.objects.values('mr_num','mr_gr_num','mr_gm_num','mr_period','mr_trans_date','mr_value_date','mr_due_date',
+                cont_list = MemberRecord.objects.filter(mr_gr_num=l_gr_num).values('mr_num','mr_gr_num','mr_gm_num','mr_period','mr_trans_date','mr_value_date','mr_due_date',
                 'mr_pamount','mr_aamount','mr_units','mr_pay_ref','mr_dr_cr','mr_paid','mr_status','mr_processed',
                 'mr_pay_type','mr_category').filter(mr_period=pr_period, mr_category=trans_cat).order_by('mr_period','mr_gm_num')
 
@@ -647,20 +676,20 @@ class GenContView(View):
 
                 for pr in period_rec:
 
-                    l_pr_num = pr.pr_num
-                    l_pr_from_date = pr.pr_from_date
-                    l_pr_to_date = pr.pr_to_date
-                    l_pr_due_date = pr.pr_due_date
-                    l_pr_status = pr.pr_status
+                    l_pr_num        = pr.pr_num
+                    l_pr_from_date  = pr.pr_from_date
+                    l_pr_to_date    = pr.pr_to_date
+                    l_pr_due_date   = pr.pr_due_date
+                    l_pr_status     = pr.pr_status
                     l_pr_proc_status = pr.pr_proc_status
-                    l_pr_int_rate = pr.pr_int_rate
-                    l_pr_amount = pr.pr_amount
+                    l_pr_int_rate   = pr.pr_int_rate
+                    l_pr_amount     = pr.pr_amount
 
                 for m_list in memb_list:
-                    l_gm_num = m_list.gm_num
+                    l_gm_num    = m_list.gm_num
                     l_gm_gr_num = m_list.gm_gr_num
-                    l_gm_units = m_list.gm_units
-                    member = GroupMember.objects.get(pk=l_gm_num)
+                    l_gm_units  = m_list.gm_units
+                    member      = GroupMember.objects.get(pk=l_gm_num)
                     #m_group = GroupTab.objects.get(pk=l_gm_gr_num)
 
                     membdue = MemberRecord()
@@ -809,11 +838,12 @@ class GenTransView(View):
 
         return render(request, self.template_name, {'GenTransForm': form})
 def g_position(request):
+        global l_gr_num
 
         dataset = MemberRecord.objects.values('mr_period').annotate(
-            cont_sum=Sum('mr_pamount', filter=Q(mr_category='1')),
-            rec_sum=Sum('mr_pamount', filter=Q(mr_dr_cr ='C')),
-            adv_sum=Sum('mr_aamount', filter=Q(mr_category='2'))) \
+            cont_sum=Sum('mr_pamount', filter=Q(mr_category='1',mr_gr_num=l_gr_num)),
+            rec_sum=Sum('mr_pamount', filter=Q(mr_dr_cr ='C',mr_gr_num=l_gr_num)),
+            adv_sum=Sum('mr_aamount', filter=Q(mr_category='2',mr_gr_num=l_gr_num))) \
             .order_by('mr_period')
 
         periods = list()
@@ -834,7 +864,7 @@ def g_position(request):
             rec = entry['rec_sum']
             if rec is None:
                 rec = 0
-            rec = float(rec)
+            rec = abs(float(rec))
 
             con_series_data.append(con)
             adv_series_data.append(adv)

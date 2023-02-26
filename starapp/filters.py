@@ -8,8 +8,7 @@ class MembContFilter(django_filters.FilterSet):
 
     class Meta:
         model = MemberRecord
-        fields = ['mr_period', 'mr_category', 'mr_gm_num']
-
+        fields = ['mr_period', 'mr_category', 'mr_gr_num','mr_gm_num']
 class MembAdvFilter(django_filters.FilterSet):
     class Meta:
         model = InterestRecord
@@ -21,7 +20,6 @@ class MembAdvFilter(django_filters.FilterSet):
 class TransFilter(django_filters.FilterSet):
     query = django_filters.CharFilter(method='universal_search',
                                       label="")
-
     class Meta:
         model = MemberRecord
         fields = ['query']

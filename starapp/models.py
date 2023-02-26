@@ -13,36 +13,7 @@ from django.template.defaultfilters import slugify
 
 	# Create your models here.
 
-#Period Class - Table contains record of operating period
-class Period(models.Model):
-		pr_statuses = (('1', 'Open'), ('2', 'Close'))
-		pr_process_choices = (('1', 'Processed'), ('2', 'Pending'))
-		pr_num = models.IntegerField(verbose_name='Period', primary_key=True,help_text='User Assigned Period')
-		pr_from_date = models.DateTimeField(verbose_name='From Date', help_text='Starting Date',null=True, blank=True)
-		pr_to_date = models.DateTimeField(verbose_name='To Date', help_text='Ending Date',null=True, blank=True)
-		pr_due_date = models.DateTimeField(verbose_name='Due Date', help_text='Due Date',null=True, blank=True)
-		pr_status = models.CharField(verbose_name='Status', max_length=1, default='2' , choices=pr_statuses, help_text='The perioid s status')
-		pr_proc_status = models.CharField(verbose_name='Processing Status', max_length=1, default='2' , choices=pr_process_choices, help_text='The group s status')
-		pr_int_rate = models.DecimalField(verbose_name='Interest rate', max_digits=5, decimal_places=2, default=0, help_text='Applicable interest rate')
-		pr_amount = models.DecimalField(verbose_name='Contribution Amount', max_digits=15, default=0, decimal_places=2, help_text='The amount members are expected to contribute in the period')
-		pr_int_days = models.IntegerField(verbose_name='Interest Days', default=0,help_text='The umber of days to elapse before interest is charged')
-		ad_user_c = models.CharField(max_length=30, blank=True, null=True, help_text='The user creating the record')
-		ad_user_a = models.CharField(max_length=30, blank=True, null=True, help_text='The last amending user')
-		ad_date_c = models.DateTimeField(auto_now_add=True, help_text='Date record was created')
-		ad_date_a = models.DateTimeField(auto_now=True, help_text='Date record was last amended')
-		ad_device_c = models.CharField(max_length=100, blank=True, null=True, help_text='The Device creating the record')
-		ad_device_a = models.CharField(max_length=100, blank=True, null=True, help_text='The Last amending device')
-		ad_ipadress_c = models.CharField(max_length=50, blank=True, null=True, help_text='The record creating ip address')
-		ad_ipadress_a = models.CharField(max_length=50, blank=True, null=True, help_text='The last amending ip address')
-		class Meta:
-			ordering = ['pr_num']
-			verbose_name = 'Period'
-		def __str__(self):
-			return self.pr_status
-		def get_absolute_url(self):
-			return reverse('Index', args=[str(self.pr_num)])
-		def get_post_url(self):
-			return reverse('edit', kwargs={'pk': self.pk})
+#Period Class - Table contains record of operating period pr_gr_num
 
 # GroupTab Class - Table contains record of fund groups
 class GroupTab(models.Model):
@@ -72,6 +43,48 @@ class GroupTab(models.Model):
 			return self.gr_name
 		def get_absolute_url(self):
 			return reverse('Index', args=[str(self.gr_num)])
+		def get_post_url(self):
+			return reverse('edit', kwargs={'pk': self.pk})
+class Period(models.Model):
+		pr_statuses = (('1', 'Open'), ('2', 'Close'))
+		pr_process_choices = (('1', 'Processed'), ('2', 'Pending'))
+		pr_num = models.IntegerField(verbose_name='Period', primary_key=True, help_text='User Assigned Period')
+		pr_gr_num = models.ForeignKey(GroupTab, on_delete=models.CASCADE, verbose_name='Group',default=1,
+									  help_text='Group to which the period belongs')
+		pr_from_date = models.DateTimeField(verbose_name='From Date', help_text='Starting Date', null=True, blank=True)
+		pr_to_date = models.DateTimeField(verbose_name='To Date', help_text='Ending Date', null=True, blank=True)
+		pr_due_date = models.DateTimeField(verbose_name='Due Date', help_text='Due Date', null=True, blank=True)
+		pr_status = models.CharField(verbose_name='Status', max_length=1, default='2', choices=pr_statuses,
+									 help_text='The perioid s status')
+		pr_proc_status = models.CharField(verbose_name='Processing Status', max_length=1, default='2',
+										  choices=pr_process_choices, help_text='The group s status')
+		pr_int_rate = models.DecimalField(verbose_name='Interest rate', max_digits=5, decimal_places=2, default=0,
+										  help_text='Applicable interest rate')
+		pr_amount = models.DecimalField(verbose_name='Contribution Amount', max_digits=15, default=0, decimal_places=2,
+										help_text='The amount members are expected to contribute in the period')
+		pr_int_days = models.IntegerField(verbose_name='Interest Days', default=0,
+										  help_text='The umber of days to elapse before interest is charged')
+		ad_user_c = models.CharField(max_length=30, blank=True, null=True, help_text='The user creating the record')
+		ad_user_a = models.CharField(max_length=30, blank=True, null=True, help_text='The last amending user')
+		ad_date_c = models.DateTimeField(auto_now_add=True, help_text='Date record was created')
+		ad_date_a = models.DateTimeField(auto_now=True, help_text='Date record was last amended')
+		ad_device_c = models.CharField(max_length=100, blank=True, null=True,
+									   help_text='The Device creating the record')
+		ad_device_a = models.CharField(max_length=100, blank=True, null=True, help_text='The Last amending device')
+		ad_ipadress_c = models.CharField(max_length=50, blank=True, null=True,
+										 help_text='The record creating ip address')
+		ad_ipadress_a = models.CharField(max_length=50, blank=True, null=True, help_text='The last amending ip address')
+
+		class Meta:
+			ordering = ['pr_num']
+			verbose_name = 'Period'
+
+		def __str__(self):
+			return self.pr_status
+
+		def get_absolute_url(self):
+			return reverse('Index', args=[str(self.pr_num)])
+
 		def get_post_url(self):
 			return reverse('edit', kwargs={'pk': self.pk})
 

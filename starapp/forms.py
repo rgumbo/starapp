@@ -14,7 +14,7 @@ from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 class PeriodForm(forms.ModelForm):
 	class Meta:
 		model = Period
-		fields = ['pr_num','pr_from_date','pr_to_date','pr_due_date','pr_status','pr_proc_status','pr_int_rate',
+		fields = ['pr_num','pr_gr_num','pr_from_date','pr_to_date','pr_due_date','pr_status','pr_proc_status','pr_int_rate',
 				  'pr_amount']
 		widgets = {
 			# 'pr_start_date': DatePickerInput(),
